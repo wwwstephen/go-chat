@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/stretchr/objx"
 	"www.github.com/wwwstephen/go-chat/trace"
 )
 
@@ -76,10 +77,24 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		log.Fatal("ServeHTTP:", err)
 		return
 	}
+
+	authCookie, err := req.Cookie("auth")
+
+	if err != nil {
+		log.Println("No auth cookie found")
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	// Decode the cookie value
+	authData := objx.MustFromBase64(authCookie.Value)
+	username := authData.Get("name").Str()
+
 	client := &client{
 		socket: socket,
 		send:   make(chan []byte, messageBufferSize),
 		room:   r,
+		name:   username,
 	}
 	r.join <- client
 	defer func() { r.leave <- client }()

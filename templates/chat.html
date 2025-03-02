@@ -30,6 +30,7 @@
             var msgBox = $("#chatbox textarea");
             var messages = $("#messages");
 
+
             $("#chatbox").submit(function () {
 
                 if (!msgBox.val()) return false;
@@ -52,6 +53,7 @@
                     alert("Connection has been closed.");
                 }
                 socket.onmessage = function (e) {
+                    var userName = "{{.UserData.name}}"
                     messages.append($("<li>").text(e.data));
                 }
             }
